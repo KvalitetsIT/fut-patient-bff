@@ -1,23 +1,8 @@
 version: '2.1'
 services:
-   mariadb:
-     image: mariadb:10.6
-     environment:
-      - MYSQL_ROOT_PASSWORD=rootroot
-      - MYSQL_DATABASE=hellodb
-      - MYSQL_USER=hellouser
-      - MYSQL_PASSWORD=secret1234
-     healthcheck:
-      test: mysql --user=hellouser --password=secret1234 -e 'show databases;'
-      interval: 2s
-      timeout: 2s
-      retries: 10
-   helloservice:
+   service:
      image: kvalitetsit/fut-patient-bff:latest
      environment:
-      - jdbc_url=jdbc:mariadb://mariadb:3306/hellodb
-      - jdbc_user=hellouser
-      - jdbc_pass=secret1234
       - usercontext_header_name=X-Test-Auth
 
       - userattributes_role_key=UserRoles
@@ -36,6 +21,6 @@ services:
      image: kvalitetsit/fut-patient-bff-documentation:latest
      environment:
       - BASE_URL=/test
-      - 'SERVER_URLS=[{"url": "http://localhost:8080", "name": "HelloService"}]'
+      - 'SERVER_URLS=[{"url": "http://localhost:8080", "name": "Service"}]'
      ports:
       - 80:8080

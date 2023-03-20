@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  title: Kithugs
-  description: API description for KITHUGS.
+  title: FUT Patient BFF
+  description: API description for FUT Patient BFF.
   version: "1.0.0"
   contact:
     email: development@kvalitetitsit.dk
 tags:
-  - name: KITHUGS
-    description: KITHUGS related API's
+  - name: FUT
+    description: FUT related API's
 
 servers:
   - url: '{protocol}://{environment}:{port}'
@@ -27,18 +27,12 @@ servers:
         default: 8080
 paths:
   /v1/hello:
-    post:
+    get:
       tags:
-        - KITHUGS
-      summary: Call the thugs service
-      description: Post your name and get some hugs or meet some thugs.
-      requestBody:
-        description: Your name
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/helloRequest'
+        - FUT
+      summary: Call the FUT hello service
+      description: Call the FUT hello service and see if it works
+
       responses:
         '200':
           description: Ok
@@ -73,14 +67,3 @@ components:
         i_can_be_null:
           type: string
           nullable: true
-
-    helloRequest:
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          description: Your name
-          type: string
-          example: "John Doe"
-          maxLength: 8
