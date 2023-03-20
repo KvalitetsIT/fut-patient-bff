@@ -181,6 +181,7 @@
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/service.yaml</inputSpec>
 							<generatorName>spring</generatorName>
+							<modelNameSuffix>Dto</modelNameSuffix>
 							<configOptions>
 								<sourceFolder>src/main/java</sourceFolder>
 								<dateLibrary>java8</dateLibrary>
