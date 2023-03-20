@@ -31,10 +31,10 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.0.4</version>
 	</parent>
-	<groupId>dk.kvalitetsit.kithugs</groupId>
-	<artifactId>kithugs</artifactId>
+	<groupId>dk.kvalitetsit.fut-patient-bff</groupId>
+	<artifactId>fut-patient-bff</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>kithugs</name>
+	<name>fut-patient-bff</name>
 	<description>KITHUGS service</description>
 
 	<properties>
@@ -57,25 +57,25 @@
 		<dependencies>
 			<!-- Modules in project -->
 			<dependency>
-				<groupId>dk.kvalitetsit.kithugs</groupId>
+				<groupId>dk.kvalitetsit.fut-patient-bff</groupId>
 				<artifactId>service</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>dk.kvalitetsit.kithugs</groupId>
+				<groupId>dk.kvalitetsit.fut-patient-bff</groupId>
 				<artifactId>integrationtest</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>dk.kvalitetsit.kithugs</groupId>
+				<groupId>dk.kvalitetsit.fut-patient-bff</groupId>
 				<artifactId>web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>dk.kvalitetsit.kithugs</groupId>
+				<groupId>dk.kvalitetsit.fut-patient-bff</groupId>
 				<artifactId>documentation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
