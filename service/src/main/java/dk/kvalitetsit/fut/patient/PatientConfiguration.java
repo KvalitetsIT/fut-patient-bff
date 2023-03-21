@@ -14,9 +14,18 @@ public class PatientConfiguration implements WebMvcConfigurer {
     private String organizationServiceUrl;
     @Value("${patient.fhir.service.endpoint}")
     private String patientServiceUrl;
+    @Value("${careplan.fhir.service.endpoint}")
+    private String careplanServiceUrl;
+    @Value("${plandefinition.fhir.service.endpoint}")
+    private String planServiceUrl;
 
     @Bean
     public PatientServiceImpl patientService(@Autowired AuthService authService, @Autowired FhirContext fhirContext) {
-        return new PatientServiceImpl(fhirContext, patientServiceUrl, organizationServiceUrl, authService);
+        return new PatientServiceImpl(fhirContext,
+                patientServiceUrl,
+                organizationServiceUrl,
+                careplanServiceUrl,
+                planServiceUrl,
+                authService);
     }
 }

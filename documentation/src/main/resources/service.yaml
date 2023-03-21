@@ -56,6 +56,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserInfo'
 
+  /v1/patients/{patientId}/questionnaires:
+    get:
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: string
+          description: the id corresponding to the patient of interest
+      tags:
+        - Patient
+      description: Questionnaires for the patient
+      summary: get questionnaries
+      operationId: v1GetPatientQuestionnary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Questionnaires'
+
   /v1/patients/{patientId}:
     parameters:
       - in: path
@@ -165,6 +187,41 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CareTeam'
+
+    Questionnaires:
+      type: array
+      items:
+        $ref: '#/components/schemas/Questionnaire'
+
+    Questionnaire:
+      type: object
+      properties:
+        id:
+          description: The id of the questionnaire
+          type: int
+        title:
+          description: The title
+          type: string
+        display:
+          description: The display title?
+          type: string
+        description:
+          description: The description to display
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionnaireItem'
+
+    QuestionnaireItem:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+        required:
+          type: boolean
 
     helloResponse:
       type: object
