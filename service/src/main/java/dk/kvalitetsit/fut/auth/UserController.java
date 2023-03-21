@@ -21,9 +21,14 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<UserInfoDto> v1GetUserInfo() throws JsonProcessingException {
+    public ResponseEntity<UserInfoDto> v1GetUserInfo() {
         AuthService.Token token = authService.getToken();
-        UserInfoDto userInfo = authService.getUserInfo(token);
+        UserInfoDto userInfo = null;
+        try {
+            userInfo = authService.getUserInfo(token);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok(userInfo);
     }
 }
