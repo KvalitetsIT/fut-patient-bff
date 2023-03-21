@@ -17,21 +17,21 @@ public class AuthService {
     public record Token(String accessToken, String refreshToken){};
     public final String USERNAME;
     public final String PASSWORD;
+    public final String CPR;
     private final String authTokenUrl;
     private final String authUserinfoUrl;
     private final String authContextUrl;
 
-    public AuthService(String username, String password,
+    public AuthService(String username, String password, String cpr,
                        String authServerUrl, String authUserinfoUrl, String authContextUrl) {
         this.USERNAME = username;
         this.PASSWORD = password;
+        this.CPR = cpr;
         this.authTokenUrl = authServerUrl;
         this.authUserinfoUrl = authUserinfoUrl;
         this.authContextUrl = authContextUrl;
     }
 
-    // TODO: Misvisende navngivning:
-    // careTeamId er faktisk en resource URL...
     private Token refreshToken(String refreshToken, String careTeamId, String episodeOfCareId, String patientId) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -60,7 +60,7 @@ public class AuthService {
         return new Token(map2.get("access_token"), map2.get("refresh_token"));
     }
 
-    private Token createToken(String username, String password, String careTeamId, String patientId) throws JsonProcessingException {
+    private Token createToken(String username, String password, String cpr, String careTeamId, String patientId) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -70,7 +70,8 @@ public class AuthService {
         map.add("grant_type", "password");
         map.add("username", username);
         map.add("password", password);
-        map.add("client_id", "oio_mock");
+        map.add("cpr", cpr);
+        map.add("client_id", "patient_mock");
 
         if (careTeamId != null) {
             map.add("care_team_id", careTeamId);
@@ -90,22 +91,22 @@ public class AuthService {
 
     public Token getToken() {
         try {
-            return this.createToken(USERNAME, PASSWORD, null, null);
+            return this.createToken(USERNAME, PASSWORD, CPR, null, null);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     public Token getToken(String username, String password) throws JsonProcessingException {
-        return createToken(username, password, null, null);
+        return createToken(username, password, CPR, null, null);
     }
 
     public Token getTokenWithCareTeamContext(String username, String password, String careTeamId) throws JsonProcessingException {
-        return createToken(username, password, careTeamId, null);
+        return createToken(username, password, CPR, careTeamId, null);
     }
 
     public Token getTokenWithPatientContext(String username, String password, String patientId) throws JsonProcessingException {
-        return this.createToken(username, password, null, patientId);
+        return this.createToken(username, password, CPR, null, patientId);
     }
 
     public Token refreshTokenWithCareTeamContext(Token token, String careTeamId) throws JsonProcessingException {

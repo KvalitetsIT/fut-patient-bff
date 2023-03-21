@@ -9,10 +9,13 @@ import org.springframework.context.annotation.Configuration;
 public class AuthConfiguration {
 
     @Value("${auth.username}")
-    public String USERNAME;
+    public String username;
 
     @Value("${auth.password}")
-    public String PASSWORD;
+    public String password;
+
+    @Value("${auth.patient.cpr}")
+    public String cpr;
 
     @Value("${auth.token.url}")
     private String authTokenUrl;
@@ -25,7 +28,7 @@ public class AuthConfiguration {
 
     @Bean
     public AuthService getAuthService() {
-        return new AuthService(USERNAME, PASSWORD, authTokenUrl, authUserinfoUrl, authContextUrl);
+        return new AuthService(username, password, cpr, authTokenUrl, authUserinfoUrl, authContextUrl);
     }
 
     @Bean

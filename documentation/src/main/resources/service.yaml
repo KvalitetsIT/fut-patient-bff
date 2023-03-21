@@ -41,6 +41,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/helloResponse'
 
+  /v1/userinfo:
+    get:
+      tags:
+        - User
+      description: Info about the user
+      summary: get userinfo from AS
+      operationId: v1GetUserInfo
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
 
   /v1/patients/{patientId}:
     parameters:
