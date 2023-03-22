@@ -2,13 +2,16 @@ package dk.kvalitetsit.fut.patient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.openapitools.api.PatientApi;
+import org.openapitools.model.CreateQuestionnaireResponseDto;
 import org.openapitools.model.PatientDto;
 import org.openapitools.model.QuestionnaireDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -34,6 +37,18 @@ public class PatientController implements PatientApi {
     @Override
     public ResponseEntity<List<QuestionnaireDto>> v1GetPatientQuestionnary(String patientId) {
         return ResponseEntity.ok(patientService.getQuestionnaries(patientId));
+    }
+
+    @Override
+    public ResponseEntity<Void> v1PostQuestionnaireResponse(
+            String patientId,
+            CreateQuestionnaireResponseDto createQuestionnaireResponseDto) {
+
+        String result = patientService.createQuestionnaireResponse(patientId);
+        // TODO: lav rigtigt response.
+        URI location = URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path("/" + result).build().toString());
+        return ResponseEntity.created(location).build();
     }
 
 }

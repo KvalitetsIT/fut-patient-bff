@@ -9,4 +9,5 @@ import java.util.List;
 public interface PatientService {
     PatientDto getPatient(String patientId, String careTeamId) throws JsonProcessingException;
     List<QuestionnaireDto> getQuestionnaries(String patientId);
+    String createQuestionnaireResponse(String patientId);
 }

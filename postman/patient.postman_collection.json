@@ -1,0 +1,485 @@
+{
+	"info": {
+		"_postman_id": "e0299809-485f-4497-98db-f8b3fad8a5f8",
+		"name": "FUT - patient",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26140630"
+	},
+	"item": [
+		{
+			"name": "gettoken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"access_token\", responseJson.access_token);",
+							"pm.collectionVariables.set(\"refresh_token\", responseJson.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "cgi_test_1",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "cgi",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "patient_mock",
+							"type": "text"
+						},
+						{
+							"key": "cpr",
+							"value": "1110109996",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://saml.devenvcgi.ehealth.sundhed.dk/auth/realms/nemlogin/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"saml",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"nemlogin",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "contexts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://saml.devenvcgi.ehealth.sundhed.dk/auth/realms/nemlogin/resource/ehealth-connect/contexts",
+					"protocol": "https",
+					"host": [
+						"saml",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"nemlogin",
+						"resource",
+						"ehealth-connect",
+						"contexts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userinfo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"pm.collectionVariables.set(\"user_id\", responseJson.user_id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://saml.devenvcgi.ehealth.sundhed.dk/auth/realms/nemlogin/protocol/openid-connect/userinfo",
+					"protocol": "https",
+					"host": [
+						"saml",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"nemlogin",
+						"protocol",
+						"openid-connect",
+						"userinfo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patient",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3UFZVYWU2Yi1JeDJVQUVoUlExcnZkZDgxVkVMODFUNndacnRtRXd4VXpNIn0.eyJleHAiOjE2NzY5OTI3MzksImlhdCI6MTY3Njk5MjQzOSwianRpIjoiZDg3MGRlM2EtMWU2ZC00NjFlLTlmODUtOWQwZjkwNTIxNTI4IiwiaXNzIjoiaHR0cHM6Ly9zYW1sLmRldmVudmNnaS5laGVhbHRoLnN1bmRoZWQuZGsvYXV0aC9yZWFsbXMvbmVtbG9naW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGF0aWVudF9tb2NrIiwic2Vzc2lvbl9zdGF0ZSI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJPcmdhbml6YXRpb24ucmVhZCIsIkNvbW11bmljYXRpb24ucmVhZCIsIlRhc2suc2VhcmNoIiwiQ29uc2VudC53cml0ZSIsIk1lZGlhLnNlYXJjaCIsIkNvbnNlbnQuZGVsZXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmRlbGV0ZSIsIlF1ZXN0aW9ubmFpcmVSZXNwb25zZS5yZWFkIiwiUGF0aWVudC5yZWFkIiwiQWN0aXZpdHlEZWZpbml0aW9uLnJlYWQiLCIkc2VhcmNoLW1lYXN1cmVtZW50cyIsIkFjdGlvbkd1aWRhbmNlLnJlYWQiLCJPcmdhbml6YXRpb24uc2VhcmNoIiwiT2JzZXJ2YXRpb24ucGF0Y2giLCJEZXZpY2VNZXRyaWMucmVhZCIsInVtYV9hdXRob3JpemF0aW9uIiwiVGFzay5jcmVhdGUiLCJPYnNlcnZhdGlvbi53cml0ZSIsIk1lZGlhLnVwZGF0ZSIsIkNvbnNlbnQucGF0Y2giLCJUYXNrLnVwZGF0ZSIsIkxpYnJhcnkkZXZhbHVhdGUiLCJQcmFjdGl0aW9uZXIuc2VhcmNoIiwiRGV2aWNlLnNlYXJjaCIsIlF1ZXN0aW9ubmFpcmUuc2VhcmNoIiwiTGlicmFyeS5yZWFkIiwiTWVkaWEucmVhZCIsIk9ic2VydmF0aW9uLmRlbGV0ZSIsIkVwaXNvZGVPZkNhcmUucmVhZCIsIlBsYW5EZWZpbml0aW9uLnNlYXJjaCIsIk5hbWluZ1N5c3RlbS5yZWFkIiwiJHN1Ym1pdC1tZWFzdXJlbWVudCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5yZWFkIiwiRGV2aWNlTWV0cmljLnNlYXJjaCIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbm9uZSIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbWVhc3VyaW5nLXN1cHBvcnQiLCJFcGlzb2RlT2ZDYXJlJGNyZWF0ZS1lcGlzb2RlLW9mLWNhcmUiLCJDYXJlUGxhbi51cGRhdGUiLCJDb25zZW50LnJlYWQiLCJBcHBvaW50bWVudCRleHBvcnRBc2lDYWwiLCJNZWRpYS53cml0ZSIsIlBhdGllbnQgVXNlciIsIkNvbnNlbnQuY3JlYXRlIiwiVGFzay5kZWxldGUiLCJPYnNlcnZhdGlvbi5yZWFkIiwiUmVzdHJpY3Rpb25DYXRlZ29yeSRtZWFzdXJlbWVudC1tb25pdG9yaW5nIiwiQWN0aW9uR2l1ZGFuY2UucmVhZCIsIlNTTE9yZGVyLnJlYWQiLCJNZWRpYS5wYXRjaCIsIkNhcmVQbGFuLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uuc2VhcmNoIiwiQXBwb2ludG1lbnQucmVhZCIsIlNTTE9yZGVyTGluZS5zZWFyY2giLCJDYXJlUGxhbi5zZWFyY2giLCJQbGFuRGVmaW5pdGlvbi5yZWFkIiwiQ29uc2VudC51cGRhdGUiLCJPYnNlcnZhdGlvbi5jcmVhdGUiLCJNZWRpYS5kZWxldGUiLCJDb25jZXB0TWFwLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2UudXBkYXRlIiwiU1NMVHJhY2VMaW5lLnNlYXJjaCIsIkNvbW11bmljYXRpb25SZXF1ZXN0LnVwZGF0ZSIsIlNTTFRyYWNlTGluZS5yZWFkIiwiUmVsYXRlZFBlcnNvbi53cml0ZSIsIkRvY3VtZW50UmVmZXJlbmNlLnJlYWQiLCJEZXZpY2UucmVhZCIsIkNvbnNlbnQuc2VhcmNoIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmNyZWF0ZSIsIlRhc2sucmVhZCIsIkNvbW11bmljYXRpb24ud3JpdGUiLCJDb2RlU3lzdGVtLnJlYWQiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5yZWFkIiwiUHJvdmVuYW5jZS5yZWFkIiwiQ29tbXVuaWNhdGlvblJlcXVlc3QuY3JlYXRlIiwiUHJhY3RpdGlvbmVyLnJlYWQiLCJQcm92ZW5hbmNlLnNlYXJjaCIsIlNTTE9yZGVyLnNlYXJjaCIsIlBhdGllbnQud3JpdGUiLCJPYnNlcnZhdGlvbi51cGRhdGUiLCJRdWVzdGlvbm5haXJlLnJlYWQiLCJEZXZpY2VVc2VTdGF0ZW1lbnQucmVhZCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5zZWFyY2giLCJBY3Rpdml0eURlZmluaXRpb24uc2VhcmNoIiwiJHZhbGlkYXRlIiwiQ29uZGl0aW9uLnNlYXJjaCIsIm9mZmxpbmVfYWNjZXNzIiwiTGlicmFyeS5zZWFyY2giLCJSZWxhdGVkUGVyc29uLnJlYWQiLCJDb25kaXRpb24ucmVhZCIsIlNTTE9yZGVyTGluZS5yZWFkIiwiRXBpc29kZU9mQ2FyZS5zZWFyY2giLCJWaWV3LnJlYWQiLCJDYXJlVGVhbS5yZWFkIiwiRGV2aWNlLndyaXRlIiwiTWVkaWEuY3JlYXRlIiwiT2JzZXJ2YXRpb24uc2VhcmNoIiwiVmFsdWVTZXQucmVhZCIsIkRldmljZVVzZVN0YXRlbWVudC5zZWFyY2giLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uud3JpdGUiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5zZWFyY2giLCJUYXNrLndyaXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLnBhdGNoIiwiVGFzay5wYXRjaCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBwYXRpZW50X2N1c3RvbSBlbWFpbCIsInNpZCI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJ1c2VyX2lkIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2dpX3Rlc3RfMSJ9.R9jyzbUx6sZJuNMIFaoWaZyAYfAHcL8x32J6nTQD_wMR9ia7ylUqTQq_B9Kb6lzuFpVCB3c6J5PZVMOqeBukkMSPYby8IqK7q54DG988SgglhjYIrXt7gIRw-sEmaW_7YoNmlq5gMf4o6tjEdC4zQg86RmU-V7i3YOqgcTFhoJZ26kSDW6zTensdaUkdbkv3I5kCFsJ_lXyx4v5KzQJKPVPRCsE2AmTNCcMrg2MuTOtz-ycMORzfzSH9E8ac4Ou_BpGkQz6GMfMms16roDpJxgl9ZHhtbs-JnZ2MIgk3cHfRFXzzjlEuv2PD4dTKG8-1HL9mcu0QLH-jps4hX0VTtw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/271178",
+					"protocol": "https",
+					"host": [
+						"patient",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"fhir",
+						"Patient",
+						"271178"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get patient procedures",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3UFZVYWU2Yi1JeDJVQUVoUlExcnZkZDgxVkVMODFUNndacnRtRXd4VXpNIn0.eyJleHAiOjE2NzY5OTI3MzksImlhdCI6MTY3Njk5MjQzOSwianRpIjoiZDg3MGRlM2EtMWU2ZC00NjFlLTlmODUtOWQwZjkwNTIxNTI4IiwiaXNzIjoiaHR0cHM6Ly9zYW1sLmRldmVudmNnaS5laGVhbHRoLnN1bmRoZWQuZGsvYXV0aC9yZWFsbXMvbmVtbG9naW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGF0aWVudF9tb2NrIiwic2Vzc2lvbl9zdGF0ZSI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJPcmdhbml6YXRpb24ucmVhZCIsIkNvbW11bmljYXRpb24ucmVhZCIsIlRhc2suc2VhcmNoIiwiQ29uc2VudC53cml0ZSIsIk1lZGlhLnNlYXJjaCIsIkNvbnNlbnQuZGVsZXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmRlbGV0ZSIsIlF1ZXN0aW9ubmFpcmVSZXNwb25zZS5yZWFkIiwiUGF0aWVudC5yZWFkIiwiQWN0aXZpdHlEZWZpbml0aW9uLnJlYWQiLCIkc2VhcmNoLW1lYXN1cmVtZW50cyIsIkFjdGlvbkd1aWRhbmNlLnJlYWQiLCJPcmdhbml6YXRpb24uc2VhcmNoIiwiT2JzZXJ2YXRpb24ucGF0Y2giLCJEZXZpY2VNZXRyaWMucmVhZCIsInVtYV9hdXRob3JpemF0aW9uIiwiVGFzay5jcmVhdGUiLCJPYnNlcnZhdGlvbi53cml0ZSIsIk1lZGlhLnVwZGF0ZSIsIkNvbnNlbnQucGF0Y2giLCJUYXNrLnVwZGF0ZSIsIkxpYnJhcnkkZXZhbHVhdGUiLCJQcmFjdGl0aW9uZXIuc2VhcmNoIiwiRGV2aWNlLnNlYXJjaCIsIlF1ZXN0aW9ubmFpcmUuc2VhcmNoIiwiTGlicmFyeS5yZWFkIiwiTWVkaWEucmVhZCIsIk9ic2VydmF0aW9uLmRlbGV0ZSIsIkVwaXNvZGVPZkNhcmUucmVhZCIsIlBsYW5EZWZpbml0aW9uLnNlYXJjaCIsIk5hbWluZ1N5c3RlbS5yZWFkIiwiJHN1Ym1pdC1tZWFzdXJlbWVudCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5yZWFkIiwiRGV2aWNlTWV0cmljLnNlYXJjaCIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbm9uZSIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbWVhc3VyaW5nLXN1cHBvcnQiLCJFcGlzb2RlT2ZDYXJlJGNyZWF0ZS1lcGlzb2RlLW9mLWNhcmUiLCJDYXJlUGxhbi51cGRhdGUiLCJDb25zZW50LnJlYWQiLCJBcHBvaW50bWVudCRleHBvcnRBc2lDYWwiLCJNZWRpYS53cml0ZSIsIlBhdGllbnQgVXNlciIsIkNvbnNlbnQuY3JlYXRlIiwiVGFzay5kZWxldGUiLCJPYnNlcnZhdGlvbi5yZWFkIiwiUmVzdHJpY3Rpb25DYXRlZ29yeSRtZWFzdXJlbWVudC1tb25pdG9yaW5nIiwiQWN0aW9uR2l1ZGFuY2UucmVhZCIsIlNTTE9yZGVyLnJlYWQiLCJNZWRpYS5wYXRjaCIsIkNhcmVQbGFuLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uuc2VhcmNoIiwiQXBwb2ludG1lbnQucmVhZCIsIlNTTE9yZGVyTGluZS5zZWFyY2giLCJDYXJlUGxhbi5zZWFyY2giLCJQbGFuRGVmaW5pdGlvbi5yZWFkIiwiQ29uc2VudC51cGRhdGUiLCJPYnNlcnZhdGlvbi5jcmVhdGUiLCJNZWRpYS5kZWxldGUiLCJDb25jZXB0TWFwLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2UudXBkYXRlIiwiU1NMVHJhY2VMaW5lLnNlYXJjaCIsIkNvbW11bmljYXRpb25SZXF1ZXN0LnVwZGF0ZSIsIlNTTFRyYWNlTGluZS5yZWFkIiwiUmVsYXRlZFBlcnNvbi53cml0ZSIsIkRvY3VtZW50UmVmZXJlbmNlLnJlYWQiLCJEZXZpY2UucmVhZCIsIkNvbnNlbnQuc2VhcmNoIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmNyZWF0ZSIsIlRhc2sucmVhZCIsIkNvbW11bmljYXRpb24ud3JpdGUiLCJDb2RlU3lzdGVtLnJlYWQiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5yZWFkIiwiUHJvdmVuYW5jZS5yZWFkIiwiQ29tbXVuaWNhdGlvblJlcXVlc3QuY3JlYXRlIiwiUHJhY3RpdGlvbmVyLnJlYWQiLCJQcm92ZW5hbmNlLnNlYXJjaCIsIlNTTE9yZGVyLnNlYXJjaCIsIlBhdGllbnQud3JpdGUiLCJPYnNlcnZhdGlvbi51cGRhdGUiLCJRdWVzdGlvbm5haXJlLnJlYWQiLCJEZXZpY2VVc2VTdGF0ZW1lbnQucmVhZCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5zZWFyY2giLCJBY3Rpdml0eURlZmluaXRpb24uc2VhcmNoIiwiJHZhbGlkYXRlIiwiQ29uZGl0aW9uLnNlYXJjaCIsIm9mZmxpbmVfYWNjZXNzIiwiTGlicmFyeS5zZWFyY2giLCJSZWxhdGVkUGVyc29uLnJlYWQiLCJDb25kaXRpb24ucmVhZCIsIlNTTE9yZGVyTGluZS5yZWFkIiwiRXBpc29kZU9mQ2FyZS5zZWFyY2giLCJWaWV3LnJlYWQiLCJDYXJlVGVhbS5yZWFkIiwiRGV2aWNlLndyaXRlIiwiTWVkaWEuY3JlYXRlIiwiT2JzZXJ2YXRpb24uc2VhcmNoIiwiVmFsdWVTZXQucmVhZCIsIkRldmljZVVzZVN0YXRlbWVudC5zZWFyY2giLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uud3JpdGUiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5zZWFyY2giLCJUYXNrLndyaXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLnBhdGNoIiwiVGFzay5wYXRjaCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBwYXRpZW50X2N1c3RvbSBlbWFpbCIsInNpZCI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJ1c2VyX2lkIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2dpX3Rlc3RfMSJ9.R9jyzbUx6sZJuNMIFaoWaZyAYfAHcL8x32J6nTQD_wMR9ia7ylUqTQq_B9Kb6lzuFpVCB3c6J5PZVMOqeBukkMSPYby8IqK7q54DG988SgglhjYIrXt7gIRw-sEmaW_7YoNmlq5gMf4o6tjEdC4zQg86RmU-V7i3YOqgcTFhoJZ26kSDW6zTensdaUkdbkv3I5kCFsJ_lXyx4v5KzQJKPVPRCsE2AmTNCcMrg2MuTOtz-ycMORzfzSH9E8ac4Ou_BpGkQz6GMfMms16roDpJxgl9ZHhtbs-JnZ2MIgk3cHfRFXzzjlEuv2PD4dTKG8-1HL9mcu0QLH-jps4hX0VTtw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"patient\",\n      \"valueReference\": {\n        \"reference\": \"{{user_id}}\"\n      }\n    },\n    {\n      \"name\": \"start\",\n      \"valueDateTime\": \"2023-02-22T14:54:43+00:00\"\n    },\n    {\n      \"name\": \"end\",\n      \"valueDateTime\": \"2023-03-22T13:54:43+00:00\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/$get-patient-procedures",
+					"protocol": "https",
+					"host": [
+						"careplan",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"fhir",
+						"$get-patient-procedures"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Measurement",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\n{  \n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"measurement\",\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"type\": \"transaction\",\n        \"entry\": [\n            {\n              \"fullUrl\": \"urn:uuid:86f23d03-cb80-4fea-8ab1-cf2e01406771\",\n              \"resource\": \n              \n              {\n                \"resourceType\": \"QuestionnaireResponse\",\n                \"meta\": {\n                    \"profile\": [\n                        \"http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-questionnaireresponse\"\n                    ]\n                },\n                \"extension\": [\n                    {\n                        \"url\": \"http://hl7.org/fhir/StructureDefinition/workflow-episodeOfCare\",\n                        \"valueReference\": {\n                            \"reference\": \"https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/EpisodeOfCare/118621\"\n                        }\n                    },\n                    {\n                        \"url\": \"http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-quality\",\n                        \"extension\": [\n                            {\n                                \"url\": \"qualityType\",\n                                \"valueCodeableConcept\": {\n                                    \"coding\": [\n                                        {\n                                            \"system\": \"http://ehealth.sundhed.dk/cs/quality-types\",\n                                            \"code\": \"TBD\"\n                                        }\n                                    ]\n                                }\n                            },\n                            {\n                                \"url\": \"qualityCode\",\n                                \"valueCodeableConcept\": {\n                                    \"coding\": [\n                                        {\n                                            \"system\": \"http://ehealth.sundhed.dk/cs/usage-quality\",\n                                            \"code\": \"TBD\"\n                                        }\n                                    ]\n                                }\n                            }\n                        ]\n                    },\n                    {\n                        \"url\": \"http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-resolved-timing\",\n                        \"extension\": [\n                            {\n                                \"url\": \"serviceRequestVersionId\",\n                                \"valueId\": \"42\"\n                            },\n                            {\n                                \"url\": \"type\",\n                                \"valueCodeableConcept\": {\n                                    \"coding\": [\n                                        {\n                                            \"system\": \"http://ehealth.sundhed.dk/cs/resolved-timing-type\",\n                                            \"code\": \"Adhoc\"\n                                        }\n                                    ]\n                                }\n                            }\n                        ]\n                    }\n                ],\n                \"basedOn\": [\n                    {\n                        \"reference\": \"https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/ServiceRequest/120219\"\n                    }\n                ],\n                \"questionnaire\": \"https://questionnaire.devenvcgi.ehealth.sundhed.dk/fhir/Questionnaire/4953\",\n                \"status\": \"completed\",\n                \"subject\": {\n                    \"reference\": \"https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/258981\"\n                },\n                \"authored\": \"2023-03-07T15:44:49+00:00\",\n                \"source\": {\n                    \"reference\": \"https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/258981\"\n                },\n                \"item\": [\n                    {\n                        \"linkId\": \"1.2.208.176.7.200.2,34055c47-4c0d-488b-a6fe-f092563fc4a6,ehealth.sundhed.dk\",\n                        \"answer\": [\n                            {\n                                \"valueString\": \"Mellem\"\n                            }\n                        ]\n                    }\n                ]\n            }\n            \n            ,\n            \"request\": {\n              \"method\": \"POST\",\n              \"url\": \"QuestionnaireResponse\"\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://measurement.devenvcgi.ehealth.sundhed.dk/fhir/$submit-measurement",
+					"protocol": "https",
+					"host": [
+						"measurement",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"fhir",
+						"$submit-measurement"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ActivityDefinition",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3UFZVYWU2Yi1JeDJVQUVoUlExcnZkZDgxVkVMODFUNndacnRtRXd4VXpNIn0.eyJleHAiOjE2NzY5OTI3MzksImlhdCI6MTY3Njk5MjQzOSwianRpIjoiZDg3MGRlM2EtMWU2ZC00NjFlLTlmODUtOWQwZjkwNTIxNTI4IiwiaXNzIjoiaHR0cHM6Ly9zYW1sLmRldmVudmNnaS5laGVhbHRoLnN1bmRoZWQuZGsvYXV0aC9yZWFsbXMvbmVtbG9naW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGF0aWVudF9tb2NrIiwic2Vzc2lvbl9zdGF0ZSI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJPcmdhbml6YXRpb24ucmVhZCIsIkNvbW11bmljYXRpb24ucmVhZCIsIlRhc2suc2VhcmNoIiwiQ29uc2VudC53cml0ZSIsIk1lZGlhLnNlYXJjaCIsIkNvbnNlbnQuZGVsZXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmRlbGV0ZSIsIlF1ZXN0aW9ubmFpcmVSZXNwb25zZS5yZWFkIiwiUGF0aWVudC5yZWFkIiwiQWN0aXZpdHlEZWZpbml0aW9uLnJlYWQiLCIkc2VhcmNoLW1lYXN1cmVtZW50cyIsIkFjdGlvbkd1aWRhbmNlLnJlYWQiLCJPcmdhbml6YXRpb24uc2VhcmNoIiwiT2JzZXJ2YXRpb24ucGF0Y2giLCJEZXZpY2VNZXRyaWMucmVhZCIsInVtYV9hdXRob3JpemF0aW9uIiwiVGFzay5jcmVhdGUiLCJPYnNlcnZhdGlvbi53cml0ZSIsIk1lZGlhLnVwZGF0ZSIsIkNvbnNlbnQucGF0Y2giLCJUYXNrLnVwZGF0ZSIsIkxpYnJhcnkkZXZhbHVhdGUiLCJQcmFjdGl0aW9uZXIuc2VhcmNoIiwiRGV2aWNlLnNlYXJjaCIsIlF1ZXN0aW9ubmFpcmUuc2VhcmNoIiwiTGlicmFyeS5yZWFkIiwiTWVkaWEucmVhZCIsIk9ic2VydmF0aW9uLmRlbGV0ZSIsIkVwaXNvZGVPZkNhcmUucmVhZCIsIlBsYW5EZWZpbml0aW9uLnNlYXJjaCIsIk5hbWluZ1N5c3RlbS5yZWFkIiwiJHN1Ym1pdC1tZWFzdXJlbWVudCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5yZWFkIiwiRGV2aWNlTWV0cmljLnNlYXJjaCIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbm9uZSIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbWVhc3VyaW5nLXN1cHBvcnQiLCJFcGlzb2RlT2ZDYXJlJGNyZWF0ZS1lcGlzb2RlLW9mLWNhcmUiLCJDYXJlUGxhbi51cGRhdGUiLCJDb25zZW50LnJlYWQiLCJBcHBvaW50bWVudCRleHBvcnRBc2lDYWwiLCJNZWRpYS53cml0ZSIsIlBhdGllbnQgVXNlciIsIkNvbnNlbnQuY3JlYXRlIiwiVGFzay5kZWxldGUiLCJPYnNlcnZhdGlvbi5yZWFkIiwiUmVzdHJpY3Rpb25DYXRlZ29yeSRtZWFzdXJlbWVudC1tb25pdG9yaW5nIiwiQWN0aW9uR2l1ZGFuY2UucmVhZCIsIlNTTE9yZGVyLnJlYWQiLCJNZWRpYS5wYXRjaCIsIkNhcmVQbGFuLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uuc2VhcmNoIiwiQXBwb2ludG1lbnQucmVhZCIsIlNTTE9yZGVyTGluZS5zZWFyY2giLCJDYXJlUGxhbi5zZWFyY2giLCJQbGFuRGVmaW5pdGlvbi5yZWFkIiwiQ29uc2VudC51cGRhdGUiLCJPYnNlcnZhdGlvbi5jcmVhdGUiLCJNZWRpYS5kZWxldGUiLCJDb25jZXB0TWFwLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2UudXBkYXRlIiwiU1NMVHJhY2VMaW5lLnNlYXJjaCIsIkNvbW11bmljYXRpb25SZXF1ZXN0LnVwZGF0ZSIsIlNTTFRyYWNlTGluZS5yZWFkIiwiUmVsYXRlZFBlcnNvbi53cml0ZSIsIkRvY3VtZW50UmVmZXJlbmNlLnJlYWQiLCJEZXZpY2UucmVhZCIsIkNvbnNlbnQuc2VhcmNoIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmNyZWF0ZSIsIlRhc2sucmVhZCIsIkNvbW11bmljYXRpb24ud3JpdGUiLCJDb2RlU3lzdGVtLnJlYWQiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5yZWFkIiwiUHJvdmVuYW5jZS5yZWFkIiwiQ29tbXVuaWNhdGlvblJlcXVlc3QuY3JlYXRlIiwiUHJhY3RpdGlvbmVyLnJlYWQiLCJQcm92ZW5hbmNlLnNlYXJjaCIsIlNTTE9yZGVyLnNlYXJjaCIsIlBhdGllbnQud3JpdGUiLCJPYnNlcnZhdGlvbi51cGRhdGUiLCJRdWVzdGlvbm5haXJlLnJlYWQiLCJEZXZpY2VVc2VTdGF0ZW1lbnQucmVhZCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5zZWFyY2giLCJBY3Rpdml0eURlZmluaXRpb24uc2VhcmNoIiwiJHZhbGlkYXRlIiwiQ29uZGl0aW9uLnNlYXJjaCIsIm9mZmxpbmVfYWNjZXNzIiwiTGlicmFyeS5zZWFyY2giLCJSZWxhdGVkUGVyc29uLnJlYWQiLCJDb25kaXRpb24ucmVhZCIsIlNTTE9yZGVyTGluZS5yZWFkIiwiRXBpc29kZU9mQ2FyZS5zZWFyY2giLCJWaWV3LnJlYWQiLCJDYXJlVGVhbS5yZWFkIiwiRGV2aWNlLndyaXRlIiwiTWVkaWEuY3JlYXRlIiwiT2JzZXJ2YXRpb24uc2VhcmNoIiwiVmFsdWVTZXQucmVhZCIsIkRldmljZVVzZVN0YXRlbWVudC5zZWFyY2giLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uud3JpdGUiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5zZWFyY2giLCJUYXNrLndyaXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLnBhdGNoIiwiVGFzay5wYXRjaCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBwYXRpZW50X2N1c3RvbSBlbWFpbCIsInNpZCI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJ1c2VyX2lkIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2dpX3Rlc3RfMSJ9.R9jyzbUx6sZJuNMIFaoWaZyAYfAHcL8x32J6nTQD_wMR9ia7ylUqTQq_B9Kb6lzuFpVCB3c6J5PZVMOqeBukkMSPYby8IqK7q54DG988SgglhjYIrXt7gIRw-sEmaW_7YoNmlq5gMf4o6tjEdC4zQg86RmU-V7i3YOqgcTFhoJZ26kSDW6zTensdaUkdbkv3I5kCFsJ_lXyx4v5KzQJKPVPRCsE2AmTNCcMrg2MuTOtz-ycMORzfzSH9E8ac4Ou_BpGkQz6GMfMms16roDpJxgl9ZHhtbs-JnZ2MIgk3cHfRFXzzjlEuv2PD4dTKG8-1HL9mcu0QLH-jps4hX0VTtw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://plan.devenvcgi.ehealth.sundhed.dk/fhir/ActivityDefinition/16858",
+					"protocol": "https",
+					"host": [
+						"plan",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"fhir",
+						"ActivityDefinition",
+						"16858"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PlanDefinition",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3UFZVYWU2Yi1JeDJVQUVoUlExcnZkZDgxVkVMODFUNndacnRtRXd4VXpNIn0.eyJleHAiOjE2NzY5OTI3MzksImlhdCI6MTY3Njk5MjQzOSwianRpIjoiZDg3MGRlM2EtMWU2ZC00NjFlLTlmODUtOWQwZjkwNTIxNTI4IiwiaXNzIjoiaHR0cHM6Ly9zYW1sLmRldmVudmNnaS5laGVhbHRoLnN1bmRoZWQuZGsvYXV0aC9yZWFsbXMvbmVtbG9naW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGF0aWVudF9tb2NrIiwic2Vzc2lvbl9zdGF0ZSI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJPcmdhbml6YXRpb24ucmVhZCIsIkNvbW11bmljYXRpb24ucmVhZCIsIlRhc2suc2VhcmNoIiwiQ29uc2VudC53cml0ZSIsIk1lZGlhLnNlYXJjaCIsIkNvbnNlbnQuZGVsZXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmRlbGV0ZSIsIlF1ZXN0aW9ubmFpcmVSZXNwb25zZS5yZWFkIiwiUGF0aWVudC5yZWFkIiwiQWN0aXZpdHlEZWZpbml0aW9uLnJlYWQiLCIkc2VhcmNoLW1lYXN1cmVtZW50cyIsIkFjdGlvbkd1aWRhbmNlLnJlYWQiLCJPcmdhbml6YXRpb24uc2VhcmNoIiwiT2JzZXJ2YXRpb24ucGF0Y2giLCJEZXZpY2VNZXRyaWMucmVhZCIsInVtYV9hdXRob3JpemF0aW9uIiwiVGFzay5jcmVhdGUiLCJPYnNlcnZhdGlvbi53cml0ZSIsIk1lZGlhLnVwZGF0ZSIsIkNvbnNlbnQucGF0Y2giLCJUYXNrLnVwZGF0ZSIsIkxpYnJhcnkkZXZhbHVhdGUiLCJQcmFjdGl0aW9uZXIuc2VhcmNoIiwiRGV2aWNlLnNlYXJjaCIsIlF1ZXN0aW9ubmFpcmUuc2VhcmNoIiwiTGlicmFyeS5yZWFkIiwiTWVkaWEucmVhZCIsIk9ic2VydmF0aW9uLmRlbGV0ZSIsIkVwaXNvZGVPZkNhcmUucmVhZCIsIlBsYW5EZWZpbml0aW9uLnNlYXJjaCIsIk5hbWluZ1N5c3RlbS5yZWFkIiwiJHN1Ym1pdC1tZWFzdXJlbWVudCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5yZWFkIiwiRGV2aWNlTWV0cmljLnNlYXJjaCIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbm9uZSIsIlJlc3RyaWN0aW9uQ2F0ZWdvcnkkbWVhc3VyaW5nLXN1cHBvcnQiLCJFcGlzb2RlT2ZDYXJlJGNyZWF0ZS1lcGlzb2RlLW9mLWNhcmUiLCJDYXJlUGxhbi51cGRhdGUiLCJDb25zZW50LnJlYWQiLCJBcHBvaW50bWVudCRleHBvcnRBc2lDYWwiLCJNZWRpYS53cml0ZSIsIlBhdGllbnQgVXNlciIsIkNvbnNlbnQuY3JlYXRlIiwiVGFzay5kZWxldGUiLCJPYnNlcnZhdGlvbi5yZWFkIiwiUmVzdHJpY3Rpb25DYXRlZ29yeSRtZWFzdXJlbWVudC1tb25pdG9yaW5nIiwiQWN0aW9uR2l1ZGFuY2UucmVhZCIsIlNTTE9yZGVyLnJlYWQiLCJNZWRpYS5wYXRjaCIsIkNhcmVQbGFuLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uuc2VhcmNoIiwiQXBwb2ludG1lbnQucmVhZCIsIlNTTE9yZGVyTGluZS5zZWFyY2giLCJDYXJlUGxhbi5zZWFyY2giLCJQbGFuRGVmaW5pdGlvbi5yZWFkIiwiQ29uc2VudC51cGRhdGUiLCJPYnNlcnZhdGlvbi5jcmVhdGUiLCJNZWRpYS5kZWxldGUiLCJDb25jZXB0TWFwLnJlYWQiLCJRdWVzdGlvbm5haXJlUmVzcG9uc2UudXBkYXRlIiwiU1NMVHJhY2VMaW5lLnNlYXJjaCIsIkNvbW11bmljYXRpb25SZXF1ZXN0LnVwZGF0ZSIsIlNTTFRyYWNlTGluZS5yZWFkIiwiUmVsYXRlZFBlcnNvbi53cml0ZSIsIkRvY3VtZW50UmVmZXJlbmNlLnJlYWQiLCJEZXZpY2UucmVhZCIsIkNvbnNlbnQuc2VhcmNoIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLmNyZWF0ZSIsIlRhc2sucmVhZCIsIkNvbW11bmljYXRpb24ud3JpdGUiLCJDb2RlU3lzdGVtLnJlYWQiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5yZWFkIiwiUHJvdmVuYW5jZS5yZWFkIiwiQ29tbXVuaWNhdGlvblJlcXVlc3QuY3JlYXRlIiwiUHJhY3RpdGlvbmVyLnJlYWQiLCJQcm92ZW5hbmNlLnNlYXJjaCIsIlNTTE9yZGVyLnNlYXJjaCIsIlBhdGllbnQud3JpdGUiLCJPYnNlcnZhdGlvbi51cGRhdGUiLCJRdWVzdGlvbm5haXJlLnJlYWQiLCJEZXZpY2VVc2VTdGF0ZW1lbnQucmVhZCIsIkNsaW5pY2FsSW1wcmVzc2lvbi5zZWFyY2giLCJBY3Rpdml0eURlZmluaXRpb24uc2VhcmNoIiwiJHZhbGlkYXRlIiwiQ29uZGl0aW9uLnNlYXJjaCIsIm9mZmxpbmVfYWNjZXNzIiwiTGlicmFyeS5zZWFyY2giLCJSZWxhdGVkUGVyc29uLnJlYWQiLCJDb25kaXRpb24ucmVhZCIsIlNTTE9yZGVyTGluZS5yZWFkIiwiRXBpc29kZU9mQ2FyZS5zZWFyY2giLCJWaWV3LnJlYWQiLCJDYXJlVGVhbS5yZWFkIiwiRGV2aWNlLndyaXRlIiwiTWVkaWEuY3JlYXRlIiwiT2JzZXJ2YXRpb24uc2VhcmNoIiwiVmFsdWVTZXQucmVhZCIsIkRldmljZVVzZVN0YXRlbWVudC5zZWFyY2giLCJRdWVzdGlvbm5haXJlUmVzcG9uc2Uud3JpdGUiLCJDb21tdW5pY2F0aW9uUmVxdWVzdC5zZWFyY2giLCJUYXNrLndyaXRlIiwiUXVlc3Rpb25uYWlyZVJlc3BvbnNlLnBhdGNoIiwiVGFzay5wYXRjaCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBwYXRpZW50X2N1c3RvbSBlbWFpbCIsInNpZCI6IjFhYmE0ZmQ3LThhZWMtNGVkNy05OGQ5LTUxNGM0YjQ5MzY4MCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJ1c2VyX2lkIjoiMjliNmEyMGMtZjljNy00OGU2LThlMTQtMDJjOTZhMWE0NzhlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2dpX3Rlc3RfMSJ9.R9jyzbUx6sZJuNMIFaoWaZyAYfAHcL8x32J6nTQD_wMR9ia7ylUqTQq_B9Kb6lzuFpVCB3c6J5PZVMOqeBukkMSPYby8IqK7q54DG988SgglhjYIrXt7gIRw-sEmaW_7YoNmlq5gMf4o6tjEdC4zQg86RmU-V7i3YOqgcTFhoJZ26kSDW6zTensdaUkdbkv3I5kCFsJ_lXyx4v5KzQJKPVPRCsE2AmTNCcMrg2MuTOtz-ycMORzfzSH9E8ac4Ou_BpGkQz6GMfMms16roDpJxgl9ZHhtbs-JnZ2MIgk3cHfRFXzzjlEuv2PD4dTKG8-1HL9mcu0QLH-jps4hX0VTtw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://plan.devenvcgi.ehealth.sundhed.dk/fhir/PlanDefinition/16857",
+					"protocol": "https",
+					"host": [
+						"plan",
+						"devenvcgi",
+						"ehealth",
+						"sundhed",
+						"dk"
+					],
+					"path": [
+						"fhir",
+						"PlanDefinition",
+						"16857"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "refresh_token",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		}
+	]
+}

@@ -20,6 +20,8 @@ public class PatientConfiguration implements WebMvcConfigurer {
     private String planServiceUrl;
     @Value("${questionnaire.fhir.service.endpoint}")
     private String questionnaireServiceUrl;
+    @Value("${measurement.fhir.service.endpoint}")
+    private String measurementServiceUrl;
 
     @Bean
     public PatientServiceImpl patientService(@Autowired AuthService authService, @Autowired FhirContext fhirContext) {
@@ -29,6 +31,7 @@ public class PatientConfiguration implements WebMvcConfigurer {
                 careplanServiceUrl,
                 planServiceUrl,
                 questionnaireServiceUrl,
+                measurementServiceUrl,
                 authService);
     }
 }

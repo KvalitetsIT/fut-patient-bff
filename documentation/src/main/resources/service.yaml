@@ -78,6 +78,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Questionnaires'
 
+  /v1/patients/{patientId}/questionnaireResponse:
+    post:
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: string
+          description: the id corresponding to the patient of interest
+      tags:
+        - Patient
+      description: Create a completed response to a Questionnaire
+      summary: Create QuestionnareResponse
+      operationId: v1PostQuestionnaireResponse
+      requestBody:
+        description: A new consent.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionnaireResponse'
+      responses:
+        '201':
+          description: The response is created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/401'
+
+
   /v1/patients/{patientId}:
     parameters:
       - in: path
@@ -223,6 +256,12 @@ components:
           type: array
           items:
             type: string
+
+    CreateQuestionnaireResponse:
+      type: object
+      properties:
+        episodeOfCareId:
+          type: string
 
     helloResponse:
       type: object

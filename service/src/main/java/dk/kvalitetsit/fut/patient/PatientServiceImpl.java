@@ -21,13 +21,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PatientServiceImpl implements PatientService {
-    private static final Logger logger = LoggerFactory.getLogger(PatientServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(PatientServiceImpl.class);;
     private FhirContext fhirContext;
     private final String patientServiceUrl;
     private final String organizationServiceUrl;
     private final String careplanServiceUrl;
     private final String planServiceUrl;
     private final String questionnaireServiceUrl;
+    private final String measurementServiceUrl;
     private AuthService authService;
 
     public PatientServiceImpl(FhirContext fhirContext,
@@ -36,6 +37,7 @@ public class PatientServiceImpl implements PatientService {
                               String careplanServiceUrl,
                               String planServiceUrl,
                               String questionnaireServiceUrl,
+                              String measurementServiceUrl,
                               AuthService authService) {
         this.fhirContext = fhirContext;
         this.patientServiceUrl = patientServiceUrl;
@@ -43,6 +45,7 @@ public class PatientServiceImpl implements PatientService {
         this.planServiceUrl = planServiceUrl;
         this.careplanServiceUrl = careplanServiceUrl;
         this.questionnaireServiceUrl = questionnaireServiceUrl;
+        this.measurementServiceUrl = measurementServiceUrl;
         this.authService = authService;
     }
 
@@ -143,6 +146,17 @@ public class PatientServiceImpl implements PatientService {
         })).toList());
         return dto;
     }
+
+    @Override
+    public String createQuestionnaireResponse(String patientId) {
+        AuthService.Token token = authService.getToken();
+        IGenericClient client = getFhirClient(token, questionnaireServiceUrl);
+
+        // TODO: Implement!
+
+        return null;
+    }
+
 
     private <T extends Resource> List<T> lookupByCriteria(Class<T> resourceClass, List<ICriterion> criteria) {
         IGenericClient client = getFhirClient(authService.getToken(), patientServiceUrl);
