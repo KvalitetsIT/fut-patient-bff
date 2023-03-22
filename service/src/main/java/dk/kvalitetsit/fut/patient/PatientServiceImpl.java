@@ -7,17 +7,17 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.kvalitetsit.fut.auth.AuthService;
+import dk.kvalitetsit.fut.exception.NotSupportedException;
 import org.hl7.fhir.r4.model.*;
 import org.openapitools.model.PatientDto;
 import org.openapitools.model.QuestionnaireDto;
+import org.openapitools.model.QuestionnaireItemDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PatientServiceImpl implements PatientService {
@@ -27,6 +27,7 @@ public class PatientServiceImpl implements PatientService {
     private final String organizationServiceUrl;
     private final String careplanServiceUrl;
     private final String planServiceUrl;
+    private final String questionnaireServiceUrl;
     private AuthService authService;
 
     public PatientServiceImpl(FhirContext fhirContext,
@@ -34,12 +35,14 @@ public class PatientServiceImpl implements PatientService {
                               String organizationServiceUrl,
                               String careplanServiceUrl,
                               String planServiceUrl,
+                              String questionnaireServiceUrl,
                               AuthService authService) {
         this.fhirContext = fhirContext;
         this.patientServiceUrl = patientServiceUrl;
         this.organizationServiceUrl = organizationServiceUrl;
         this.planServiceUrl = planServiceUrl;
         this.careplanServiceUrl = careplanServiceUrl;
+        this.questionnaireServiceUrl = questionnaireServiceUrl;
         this.authService = authService;
     }
 
@@ -67,7 +70,7 @@ public class PatientServiceImpl implements PatientService {
         IGenericClient clientCareplan = getFhirClient(token, careplanServiceUrl);
         IGenericClient clientPlan = getFhirClient(token, planServiceUrl);
         String patientUrl = patientServiceUrl + "Patient/" + patientId;
-        List<QuestionnaireDto> returnList = new ArrayList<>();
+        Set<QuestionnaireDto> returnSet = new LinkedHashSet<>();
 
         Reference patientReference = new Reference(patientUrl);
         Parameters parameters = new Parameters();
@@ -83,7 +86,6 @@ public class PatientServiceImpl implements PatientService {
                 .returnResourceType(Bundle.class)
                 .execute();
 
-        // TODO: Der ser ud til at være dupletter i data. Skal der gøres noget ved det?
         List<ServiceRequest> list = result.getEntry().stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(r -> r.getClass().equals(ServiceRequest.class))
@@ -99,17 +101,49 @@ public class PatientServiceImpl implements PatientService {
 
             for (RelatedArtifact artefact : activityDefinition.getRelatedArtifact()) {
                 if (artefact.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF)) {
-                    QuestionnaireDto dto = new QuestionnaireDto();
-                    dto.setDisplay(artefact.getDisplay());
-                    returnList.add(dto);
-
-                    // TODO: Add the rest of the stuff!
+                    logger.info(artefact.getResource());
+                    returnSet.add(getQuestionnarie(artefact.getResource()));
                 }
             }
         }
-
-        return returnList;
+        return returnSet.stream().toList();
     }
+
+    public QuestionnaireDto getQuestionnarie(String resource) {
+        logger.info(resource);
+
+        AuthService.Token token = authService.getToken();
+        IGenericClient client = getFhirClient(token, questionnaireServiceUrl);
+        Questionnaire questionnaire = client
+                .read()
+                .resource(Questionnaire.class)
+                .withUrl(resource)
+                .execute();
+
+        QuestionnaireDto dto = new QuestionnaireDto();
+        dto.setResource(resource);
+        dto.setDescription(questionnaire.getDescription());
+        dto.setTitle(questionnaire.getTitle());
+        dto.setItems(questionnaire.getItem().stream().map((item -> {
+            QuestionnaireItemDto itemDto = new QuestionnaireItemDto();
+
+            // TODO: Only "type": "CHOICE" is supported for now.
+            // How to handle the rest?
+            if (!item.getType().name().equals("CHOICE")) {
+                throw new NotSupportedException();
+            }
+
+            itemDto.setType(item.getType().name());
+            itemDto.setRequired(item.getRequired());
+            itemDto.setText(item.getText());
+            itemDto.setAnswerOptions(item.getAnswerOption().stream().map(
+                    o -> o.getValueStringType().getValueAsString()).toList());
+
+            return itemDto;
+        })).toList());
+        return dto;
+    }
+
     private <T extends Resource> List<T> lookupByCriteria(Class<T> resourceClass, List<ICriterion> criteria) {
         IGenericClient client = getFhirClient(authService.getToken(), patientServiceUrl);
         IQuery<Bundle> query = client

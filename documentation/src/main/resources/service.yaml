@@ -196,14 +196,11 @@ components:
     Questionnaire:
       type: object
       properties:
-        id:
-          description: The id of the questionnaire
-          type: int
+        resource:
+          description: The resource url of the questionnaire
+          type: string
         title:
           description: The title
-          type: string
-        display:
-          description: The display title?
           type: string
         description:
           description: The description to display
@@ -222,6 +219,10 @@ components:
           type: string
         required:
           type: boolean
+        answerOptions:
+          type: array
+          items:
+            type: string
 
     helloResponse:
       type: object
