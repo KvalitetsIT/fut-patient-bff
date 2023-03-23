@@ -110,7 +110,6 @@ paths:
         '401':
           $ref: '#/components/responses/401'
 
-
   /v1/patients/{patientId}:
     parameters:
       - in: path
@@ -232,6 +231,12 @@ components:
         resource:
           description: The resource url of the questionnaire
           type: string
+        episodeOfCare:
+          description: The resource url of the episode of care
+          type: string
+        serviceRequest:
+          description: The resource url of the service request
+          type: string
         title:
           description: The title
           type: string
@@ -250,6 +255,8 @@ components:
           type: string
         type:
           type: string
+        linkId:
+          type: string
         required:
           type: boolean
         answerOptions:
@@ -260,8 +267,32 @@ components:
     CreateQuestionnaireResponse:
       type: object
       properties:
-        episodeOfCareId:
+        resource:
+          description: The resource url of the questionnaire
           type: string
+        episodeOfCare:
+          description: The resource url of the episode of care
+          type: string
+        serviceRequest:
+          description: The resource url of the service request
+          type: string
+        patientId:
+          description: The resource url of the patient given the questionnaire
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateQuestionnaireResponseItem'
+
+    CreateQuestionnaireResponseItem:
+      type: object
+      properties:
+        linkId:
+          type: string
+        answers:
+          type: array
+          items:
+            type: string
 
     helloResponse:
       type: object

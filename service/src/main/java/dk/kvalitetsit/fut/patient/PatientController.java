@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -43,11 +42,8 @@ public class PatientController implements PatientApi {
     public ResponseEntity<Void> v1PostQuestionnaireResponse(
             String patientId,
             CreateQuestionnaireResponseDto createQuestionnaireResponseDto) {
-
-        String result = patientService.createQuestionnaireResponse(patientId);
-        // TODO: lav rigtigt response.
-        URI location = URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/" + result).build().toString());
+        String result = patientService.createQuestionnaireResponse(patientId, createQuestionnaireResponseDto);
+        URI location = URI.create(result);
         return ResponseEntity.created(location).build();
     }
 

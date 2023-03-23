@@ -10,9 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.kvalitetsit.fut.auth.AuthService;
 import dk.kvalitetsit.fut.exception.NotSupportedException;
 import org.hl7.fhir.r4.model.*;
-import org.openapitools.model.PatientDto;
-import org.openapitools.model.QuestionnaireDto;
-import org.openapitools.model.QuestionnaireItemDto;
+import org.openapitools.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,13 +88,20 @@ public class PatientServiceImpl implements PatientService {
                 .returnResourceType(Bundle.class)
                 .execute();
 
-        List<ServiceRequest> list = result.getEntry().stream()
+        List<ServiceRequest> serviceRequests = result.getEntry().stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(r -> r.getClass().equals(ServiceRequest.class))
                 .map(sr -> (ServiceRequest) sr)
                 .toList();
 
-        for (ServiceRequest sr : list) {
+
+        for (ServiceRequest sr : serviceRequests) {
+            Extension ext = sr.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/workflow-episodeOfCare");
+            String srUrl = careplanServiceUrl + "ServiceRequest/" + sr.getIdElement().getIdPart();
+
+            // How else to get the reference from the value?
+            String eoc = ((Reference) ext.getValue()).getReference();
+
             CanonicalType ct = sr.getInstantiatesCanonical().get(0);
             ActivityDefinition activityDefinition = clientPlan
                     .read()
@@ -106,14 +111,20 @@ public class PatientServiceImpl implements PatientService {
             for (RelatedArtifact artefact : activityDefinition.getRelatedArtifact()) {
                 if (artefact.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF)) {
                     logger.info(artefact.getResource());
-                    returnSet.add(getQuestionnarie(artefact.getResource()));
+                    returnSet.add(getQuestionnarie(
+                            artefact.getResource(),
+                            eoc,
+                            srUrl,
+                            patientId
+                    ));
                 }
             }
         }
         return returnSet.stream().toList();
     }
 
-    public QuestionnaireDto getQuestionnarie(String resource) {
+    public QuestionnaireDto getQuestionnarie(String resource, String episodeOfCare,
+                                             String serviceRequest, String patientId) {
         logger.info(resource);
 
         AuthService.Token token = authService.getToken();
@@ -125,6 +136,8 @@ public class PatientServiceImpl implements PatientService {
                 .execute();
 
         QuestionnaireDto dto = new QuestionnaireDto();
+        dto.setEpisodeOfCare(episodeOfCare);
+        dto.setServiceRequest(serviceRequest);
         dto.setResource(resource);
         dto.setDescription(questionnaire.getDescription());
         dto.setTitle(questionnaire.getTitle());
@@ -137,6 +150,7 @@ public class PatientServiceImpl implements PatientService {
                 throw new NotSupportedException();
             }
 
+            itemDto.setLinkId(item.getLinkId());
             itemDto.setType(item.getType().name());
             itemDto.setRequired(item.getRequired());
             itemDto.setText(item.getText());
@@ -149,12 +163,16 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    // TODO: Input parameters missing!
-    public String createQuestionnaireResponse(String patientId) {
+    public String createQuestionnaireResponse(String patientId, CreateQuestionnaireResponseDto dto) {
+        String questionnaire = dto.getResource();
+        String episodeOfCare = dto.getEpisodeOfCare();
+        String serviceRequest = dto.getServiceRequest();
+        List<CreateQuestionnaireResponseItemDto> answers =  dto.getItems();
+
         AuthService.Token token = authService.getTokenWithEpisodeOfCareContext(
                 authService.USERNAME,
                 authService.PASSWORD,
-                "https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/EpisodeOfCare/118621");
+                episodeOfCare);
         IGenericClient client = getFhirClient(token, measurementServiceUrl);
 
         // Create the QuestionnaireResponse resource
@@ -162,8 +180,8 @@ public class PatientServiceImpl implements PatientService {
         Meta meta = new Meta();
         meta.addProfile("http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-questionnaireresponse");
         qr.setMeta(meta);
-        qr.addBasedOn(new Reference("https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/ServiceRequest/120219"));
-        qr.setQuestionnaire("https://questionnaire.devenvcgi.ehealth.sundhed.dk/fhir/Questionnaire/4953");
+        qr.addBasedOn(new Reference(serviceRequest));
+        qr.setQuestionnaire(questionnaire);
         qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
         qr.setSubject(new Reference("https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/258981"));
         qr.setAuthored(new Date());
@@ -175,7 +193,7 @@ public class PatientServiceImpl implements PatientService {
 
         // Extension 1
         Extension ext1 = new Extension("http://hl7.org/fhir/StructureDefinition/workflow-episodeOfCare",
-                new Reference("https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/EpisodeOfCare/118621"));
+                new Reference(episodeOfCare));
         extensions.add(ext1);
 
         // Extension 2
@@ -206,16 +224,22 @@ public class PatientServiceImpl implements PatientService {
         extensions.add(ext3);
 
         // Create answers
-        List<QuestionnaireResponse.QuestionnaireResponseItemComponent> items = new ArrayList<>();
-        QuestionnaireResponse.QuestionnaireResponseItemComponent qric =
-                new QuestionnaireResponse.QuestionnaireResponseItemComponent();
-        items.add(qric);
-        qric.setLinkId("1.2.208.176.7.200.2,34055c47-4c0d-488b-a6fe-f092563fc4a6,ehealth.sundhed.dk");
-        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent answer =
-                new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent();
-        answer.setValue(new StringType().setValue("Mellem"));
-        qric.addAnswer(answer);
-        qr.setItem(items);
+        for (CreateQuestionnaireResponseItemDto answerItem : answers) {
+            List<QuestionnaireResponse.QuestionnaireResponseItemComponent> items = new ArrayList<>();
+            QuestionnaireResponse.QuestionnaireResponseItemComponent qric =
+                    new QuestionnaireResponse.QuestionnaireResponseItemComponent();
+            items.add(qric);
+            qric.setLinkId(answerItem.getLinkId());
+
+            for (String text : answerItem.getAnswers()) {
+                QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent a =
+                        new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent();
+                a.setValue(new StringType().setValue(text));
+                qric.addAnswer(a);
+            }
+
+            qr.setItem(items);
+        }
 
         // Built bundle
         BundleBuilder builder = new BundleBuilder(fhirContext);
@@ -235,7 +259,7 @@ public class PatientServiceImpl implements PatientService {
                 .returnResourceType(Bundle.class)
                 .execute();
 
-        return result.getId();
+        return result.getEntry().get(0).getResponse().getLocation();
     }
 
 
