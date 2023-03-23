@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.kvalitetsit.fut.auth.AuthService;
 import dk.kvalitetsit.fut.exception.NotSupportedException;
@@ -148,13 +149,93 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    // TODO: Input parameters missing!
     public String createQuestionnaireResponse(String patientId) {
-        AuthService.Token token = authService.getToken();
-        IGenericClient client = getFhirClient(token, questionnaireServiceUrl);
+        AuthService.Token token = authService.getTokenWithEpisodeOfCareContext(
+                authService.USERNAME,
+                authService.PASSWORD,
+                "https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/EpisodeOfCare/118621");
+        IGenericClient client = getFhirClient(token, measurementServiceUrl);
 
-        // TODO: Implement!
+        // Create the QuestionnaireResponse resource
+        QuestionnaireResponse qr = new QuestionnaireResponse();
+        Meta meta = new Meta();
+        meta.addProfile("http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-questionnaireresponse");
+        qr.setMeta(meta);
+        qr.addBasedOn(new Reference("https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/ServiceRequest/120219"));
+        qr.setQuestionnaire("https://questionnaire.devenvcgi.ehealth.sundhed.dk/fhir/Questionnaire/4953");
+        qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+        qr.setSubject(new Reference("https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/258981"));
+        qr.setAuthored(new Date());
+        qr.setSource(new Reference("https://patient.devenvcgi.ehealth.sundhed.dk/fhir/Patient/258981"));
 
-        return null;
+        // Set the extensions
+        List<Extension> extensions = new ArrayList<>();
+        qr.setExtension(extensions);
+
+        // Extension 1
+        Extension ext1 = new Extension("http://hl7.org/fhir/StructureDefinition/workflow-episodeOfCare",
+                new Reference("https://careplan.devenvcgi.ehealth.sundhed.dk/fhir/EpisodeOfCare/118621"));
+        extensions.add(ext1);
+
+        // Extension 2
+        Extension ext2 = new Extension();
+        ext2.setUrl("http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-quality");
+        ext2.addExtension(new Extension("qualityType",
+                new CodeableConcept(new Coding(
+                        "http://ehealth.sundhed.dk/cs/quality-types",
+                        "TBD", ""))));
+        ext2.addExtension(new Extension("qualityCode",
+                new CodeableConcept(new Coding(
+                        "http://ehealth.sundhed.dk/cs/usage-quality",
+                        "TBD", ""))));
+        extensions.add(ext2);
+
+        // Extension 3
+        Extension ext3 = new Extension();
+        ext3.setUrl("http://ehealth.sundhed.dk/fhir/StructureDefinition/ehealth-resolved-timing");
+        Extension ext3inner1 = new Extension();
+        // "42" is from the example in the docs
+        ext3inner1.setValue(new IdType(42)).setUrl("serviceRequestVersionId");
+        ext3.addExtension(ext3inner1);
+        Extension ext3inner2 = new Extension();
+        ext3inner2.setValue(new CodeableConcept(new Coding(
+                "http://ehealth.sundhed.dk/cs/resolved-timing-type",
+                "Adhoc", ""))).setUrl("type");
+        ext3.addExtension(ext3inner2);
+        extensions.add(ext3);
+
+        // Create answers
+        List<QuestionnaireResponse.QuestionnaireResponseItemComponent> items = new ArrayList<>();
+        QuestionnaireResponse.QuestionnaireResponseItemComponent qric =
+                new QuestionnaireResponse.QuestionnaireResponseItemComponent();
+        items.add(qric);
+        qric.setLinkId("1.2.208.176.7.200.2,34055c47-4c0d-488b-a6fe-f092563fc4a6,ehealth.sundhed.dk");
+        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent answer =
+                new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent();
+        answer.setValue(new StringType().setValue("Mellem"));
+        qric.addAnswer(answer);
+        qr.setItem(items);
+
+        // Built bundle
+        BundleBuilder builder = new BundleBuilder(fhirContext);
+        builder.addTransactionCreateEntry(qr);
+        Bundle bundle = (Bundle) builder.getBundle(); // Why is return type IBaseBundle?
+
+        // Work-around: FullUrl will be overwritten by the server.
+        bundle.getEntry().get(0).setFullUrl("42");
+
+        Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(bundle).setName("measurement");
+
+        Bundle result = client.operation()
+                .onServer()
+                .named("$submit-measurement")
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        return result.getId();
     }
 
 
