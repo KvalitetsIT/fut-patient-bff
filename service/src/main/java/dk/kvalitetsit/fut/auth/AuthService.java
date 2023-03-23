@@ -32,7 +32,7 @@ public class AuthService {
         this.authContextUrl = authContextUrl;
     }
 
-    private Token refreshToken(String refreshToken, String careTeamId, String episodeOfCareId, String patientId) throws JsonProcessingException {
+    private Token refreshToken(String refreshToken, String careTeamId, String episodeOfCareId, String patientId) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -41,7 +41,7 @@ public class AuthService {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type", "refresh_token");
         map.add("refresh_token", refreshToken);
-        map.add("client_id", "oio_mock");
+        map.add("client_id", "patient_mock");
         map.add("care_team_id", careTeamId);
         if (episodeOfCareId != null) {
             map.add("episode_of_care_id", episodeOfCareId);
@@ -55,12 +55,22 @@ public class AuthService {
         ResponseEntity<String> response = restTemplate.postForEntity(authTokenUrl, request, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<Object, String> map2 = mapper.readValue(response.getBody(), Map.class);
+        Map<Object, String> map2 = null;
+        try {
+            map2 = mapper.readValue(response.getBody(), Map.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         return new Token(map2.get("access_token"), map2.get("refresh_token"));
     }
 
-    private Token createToken(String username, String password, String cpr, String careTeamId, String patientId) throws JsonProcessingException {
+    private Token createToken(String username,
+                              String password,
+                              String cpr,
+                              String careTeamId,
+                              String patientId,
+                              String episodeOfCareId) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -81,43 +91,56 @@ public class AuthService {
             map.add("patient_id", patientId);
         }
 
+        if (episodeOfCareId != null) {
+            map.add("episode_of_care_id", episodeOfCareId);
+        }
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(authTokenUrl, request, String.class);
         ObjectMapper mapper = new ObjectMapper();
-        Map<Object, String> map2 = mapper.readValue(response.getBody(), Map.class);
+        Map<Object, String> map2 = null;
+        try {
+            map2 = mapper.readValue(response.getBody(), Map.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         return new Token(map2.get("access_token"), map2.get("refresh_token"));
     }
 
     public Token getToken() {
-        try {
-            return this.createToken(USERNAME, PASSWORD, CPR, null, null);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return this.createToken(USERNAME, PASSWORD, CPR, null, null, null);
     }
 
     public Token getToken(String username, String password) throws JsonProcessingException {
-        return createToken(username, password, CPR, null, null);
+        return createToken(username, password, CPR, null, null, null);
     }
 
-    public Token getTokenWithCareTeamContext(String username, String password, String careTeamId) throws JsonProcessingException {
-        return createToken(username, password, CPR, careTeamId, null);
+    public Token getTokenWithEpisodeOfCareContext(String username, String password, String episodeOfCare) {
+        return createToken(username, password, CPR, null, null, episodeOfCare);
     }
 
-    public Token getTokenWithPatientContext(String username, String password, String patientId) throws JsonProcessingException {
-        return this.createToken(username, password, CPR, null, patientId);
+    public Token getTokenWithCareTeamContext(String username, String password, String careTeamId) {
+        return createToken(username, password, CPR, careTeamId, null, null);
     }
 
-    public Token refreshTokenWithCareTeamContext(Token token, String careTeamId) throws JsonProcessingException {
+    public Token getTokenWithPatientContext(String username, String password, String patientId)  {
+        return this.createToken(username, password, CPR, null, patientId, null);
+    }
+
+    public Token refreshTokenWithCareTeamContext(Token token, String careTeamId) {
         return refreshToken(token.refreshToken(), careTeamId, null, null);
     }
 
-    public Token refreshTokenWithCareTeamAndEpisodeOfCareContext(Token token, String careTeamId, String episodeOfCareId) throws JsonProcessingException {
+    public Token refreshTokenWithEpisodeOfCareContext(Token token, String episodeOfCareId) {
+        return refreshToken(token.refreshToken(), null, episodeOfCareId, null);
+    }
+
+    public Token refreshTokenWithCareTeamAndEpisodeOfCareContext(Token token, String careTeamId, String episodeOfCareId) {
         return refreshToken(token.refreshToken(), careTeamId, episodeOfCareId, null);
     }
 
-    public Token refreshTokenWithCareTeamAndPatientContext(Token token, String careTeamId, String patientId) throws JsonProcessingException {
+    public Token refreshTokenWithCareTeamAndPatientContext(Token token, String careTeamId, String patientId) {
         return refreshToken(token.refreshToken(), careTeamId, null, patientId);
     }
 
