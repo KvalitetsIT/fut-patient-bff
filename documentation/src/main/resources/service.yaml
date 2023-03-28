@@ -228,6 +228,9 @@ components:
     Questionnaire:
       type: object
       properties:
+        id:
+          description: The id of the questionnaire
+          type: string
         resource:
           description: The resource url of the questionnaire
           type: string
@@ -275,9 +278,6 @@ components:
           type: string
         serviceRequest:
           description: The resource url of the service request
-          type: string
-        patientId:
-          description: The resource url of the patient given the questionnaire
           type: string
         items:
           type: array

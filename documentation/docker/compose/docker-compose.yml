@@ -12,9 +12,6 @@ services:
       - userrole_user_values=userrole1,userrole2
       - userrole_monitor_values=monitorrole
       - userrole_provisioner_values=provisionerrole
-     depends_on:
-      mariadb:
-       condition: service_healthy
      ports: 
       - 8080:8080
    documenatation-and-test:

@@ -110,12 +110,10 @@ public class PatientServiceImpl implements PatientService {
 
             for (RelatedArtifact artefact : activityDefinition.getRelatedArtifact()) {
                 if (artefact.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF)) {
-                    logger.info(artefact.getResource());
                     returnSet.add(getQuestionnarie(
                             artefact.getResource(),
                             eoc,
-                            srUrl,
-                            patientId
+                            srUrl
                     ));
                 }
             }
@@ -124,9 +122,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     public QuestionnaireDto getQuestionnarie(String resource, String episodeOfCare,
-                                             String serviceRequest, String patientId) {
-        logger.info(resource);
-
+                                             String serviceRequest) {
         AuthService.Token token = authService.getToken();
         IGenericClient client = getFhirClient(token, questionnaireServiceUrl);
         Questionnaire questionnaire = client
@@ -136,6 +132,7 @@ public class PatientServiceImpl implements PatientService {
                 .execute();
 
         QuestionnaireDto dto = new QuestionnaireDto();
+        dto.setId(questionnaire.getIdElement().getIdPart());
         dto.setEpisodeOfCare(episodeOfCare);
         dto.setServiceRequest(serviceRequest);
         dto.setResource(resource);
