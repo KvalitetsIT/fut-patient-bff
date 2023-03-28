@@ -78,7 +78,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Questionnaires'
 
-  /v1/patients/{patientId}/questionnaireResponse:
+  /v1/patients/{patientId}/questionnaireResponses:
+    get:
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: string
+          description: the id corresponding to the patient of interest
+        - in: query
+          name: episodeOfCare
+          description: Find all questionnaireResponse related to one Episode of Care
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: basedOnServiceRequest
+          description: Find all questionnaireResponse based on this Service Request
+          required: false
+          schema:
+            type: string
+      tags:
+        - Patient
+      description: QuestionnaireResponses for the patient
+      summary: get QuestionnaireResponses
+      operationId: v1GetPatientQuestionnaryResponses
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireResponseCount'
     post:
       parameters:
         - in: path
@@ -293,6 +325,12 @@ components:
           type: array
           items:
             type: string
+
+    QuestionnaireResponseCount:
+      type: object
+      properties:
+        count:
+          type: integer
 
     helloResponse:
       type: object

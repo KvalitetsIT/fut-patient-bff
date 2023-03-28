@@ -5,6 +5,7 @@ import org.openapitools.api.PatientApi;
 import org.openapitools.model.CreateQuestionnaireResponseDto;
 import org.openapitools.model.PatientDto;
 import org.openapitools.model.QuestionnaireDto;
+import org.openapitools.model.QuestionnaireResponseCountDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,18 @@ public class PatientController implements PatientApi {
     @Override
     public ResponseEntity<List<QuestionnaireDto>> v1GetPatientQuestionnary(String patientId) {
         return ResponseEntity.ok(patientService.getQuestionnaries(patientId));
+    }
+
+    @Override
+    public ResponseEntity<QuestionnaireResponseCountDto> v1GetPatientQuestionnaryResponses(
+            String patientId,
+            String episodeOfCare,
+            String basedOnServiceRequest) {
+
+        int count = patientService.getQuestionnarieResponsesCount(patientId, episodeOfCare, basedOnServiceRequest);
+        var dto = new QuestionnaireResponseCountDto();
+        dto.setCount(count);
+        return ResponseEntity.ok(dto);
     }
 
     @Override

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.kvalitetsit.fut.auth.AuthService;
@@ -119,6 +120,31 @@ public class PatientServiceImpl implements PatientService {
             }
         }
         return returnSet.stream().toList();
+    }
+
+    @Override
+    public int getQuestionnarieResponsesCount(String patientId, String episodeOfCare, String basedOnServiceRequest) {
+        AuthService.Token token = authService.getTokenWithEpisodeOfCareContext(
+                authService.USERNAME,
+                authService.PASSWORD,
+                episodeOfCare);
+        IGenericClient client = getFhirClient(token, measurementServiceUrl);
+
+        Bundle bundle = client
+                .search()
+                .forResource(QuestionnaireResponse.class)
+                .where(new ReferenceClientParam("episodeOfCare").hasId(episodeOfCare))
+                .returnBundle(Bundle.class)
+                .execute();
+
+        if (basedOnServiceRequest != null) {
+            long count = bundle.getEntry().stream().filter(b -> ((QuestionnaireResponse) b.getResource())
+                    .getBasedOnFirstRep().getReference().equals(basedOnServiceRequest) ).count();
+
+            return (int) count;
+        } else {
+            return bundle.getTotal();
+        }
     }
 
     public QuestionnaireDto getQuestionnarie(String resource, String episodeOfCare,
