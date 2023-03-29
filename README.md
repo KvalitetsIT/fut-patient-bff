@@ -1,5 +1,5 @@
 ![Build Status](https://github.com/KvalitetsIT/fut-patient-bff/workflows/CICD/badge.svg)
-# fut-patient-bff
+# FUT Patient Demo - BFF
 
 Template repository showing how to be a good Java Spring Boot citizen in a k8s cluster.
 
