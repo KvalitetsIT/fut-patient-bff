@@ -77,7 +77,9 @@ public class PatientServiceImpl implements PatientService {
 
         Reference patientReference = new Reference(patientUrl);
         Parameters parameters = new Parameters();
-        Date dateOneMonthAgo = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date dateOneMonthAgo = Date.from(LocalDate.now().minusDays(29)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant());
+        logger.info(dateOneMonthAgo.toString());
         parameters.addParameter().setName("patient").setValue(patientReference);
         parameters.addParameter().setName("start").setValue(new DateTimeType(dateOneMonthAgo));
         parameters.addParameter().setName("end").setValue(new DateTimeType(new Date()));
