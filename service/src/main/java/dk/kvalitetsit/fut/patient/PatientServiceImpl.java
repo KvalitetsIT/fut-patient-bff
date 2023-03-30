@@ -135,6 +135,7 @@ public class PatientServiceImpl implements PatientService {
         Bundle bundle = client
                 .search()
                 .forResource(QuestionnaireResponse.class)
+                .count(200) // Default is 20
                 .where(new ReferenceClientParam("episodeOfCare").hasId(episodeOfCare))
                 .returnBundle(Bundle.class)
                 .execute();
